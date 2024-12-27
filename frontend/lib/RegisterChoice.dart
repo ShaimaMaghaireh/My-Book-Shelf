@@ -1,114 +1,105 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:frontend/login.dart';
+import 'package:frontend/signup.dart';
 
-class LoginScreen extends StatefulWidget {
+class RegisterChoicePage extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegisterChoicePageState createState() => _RegisterChoicePageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  bool isLogin = true;
-
-  void toggleForm() {
-    setState(() {
-      isLogin = !isLogin;
-    });
-  }
-
+class _RegisterChoicePageState extends State<RegisterChoicePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade100,
-      body: Center(
-        child: SingleChildScrollView(
-          child: Opacity(
-            opacity: 0.9,
-            child: Container(
-              width: 350,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.shade300,
-                    blurRadius: 10,
-                    offset: Offset(0, 5),
-                  )
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    isLogin ? 'Login' : 'Sign Up',
-                    style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: TextStyle(color: Colors.blue),
-                      filled: true,
-                      fillColor: Colors.blue.shade50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: TextStyle(color: Colors.blue),
-                      filled: true,
-                      fillColor: Colors.blue.shade50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle login or signup logic here
-                      print('Email: ${_emailController.text}');
-                      print('Password: ${_passwordController.text}');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      isLogin ? 'Login' : 'Sign Up',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  TextButton(
-                    onPressed: toggleForm,
-                    child: Text(
-                      isLogin ? 'Don\'t have an account? Sign Up' : 'Already have an account? Login',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                ],
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image:NetworkImage('https://i.pinimg.com/736x/82/82/43/8282435ab9387e8b946d23f62eeeeeea.jpg'), // Replace with your image
+                fit: BoxFit.cover,
               ),
             ),
           ),
-        ),
+          // Blurred Overlay
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(
+              color: Colors.black.withOpacity(0.3),
+            ),
+          ),
+          // Content
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'WELCOME',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                SizedBox(height: 60),
+                // Login Button
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.lightBlue.withOpacity(0.5),
+                    padding: EdgeInsets.symmetric(horizontal: 150, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () {
+                   Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()), // Your next screen
+    );
+                  },
+                  child: Text(
+                    'LOGIN',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+                
+                SizedBox(height: 20),
+                // Sign Up Button
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.lightBlue.withOpacity(0.5),
+                    padding: EdgeInsets.symmetric(horizontal: 140, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () {
+                   Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignupScreen()), // Your next screen
+    );
+                  },
+                  child: Text(
+                    'SIGN UP',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+              SizedBox(height: 50),
+                IconButton(onPressed: (){
+                Navigator.pop(context);
+                }, 
+                icon: Icon(Icons.arrow_back_ios_new,
+                color: Colors.deepPurpleAccent,)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+

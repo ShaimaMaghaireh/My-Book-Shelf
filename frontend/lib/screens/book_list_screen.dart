@@ -12,6 +12,7 @@ class BookListScreen extends StatefulWidget {
 
 class _BookListScreenState extends State<BookListScreen> {
   late Future<List<Book>> books;
+  TextEditingController _searchController = TextEditingController();
  int _selectedIndex = 0;
   @override
   void initState() {
@@ -20,7 +21,17 @@ class _BookListScreenState extends State<BookListScreen> {
   }
 void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Update the selected index
+      _selectedIndex = index; //? Update the selected index in bottom navigation bar
+    });
+  }
+
+   void _onSearchChanged() {
+    setState(() {
+      if (_searchController.text.isNotEmpty) {
+        books = ApiService().searchBooks(_searchController.text);//? search for books based on title
+      } else {
+        books = ApiService().fetchBooks();  //?fethc the book after search
+      }
     });
   }
   @override
@@ -62,10 +73,10 @@ void _onItemTapped(int index) {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-             // controller: _searchController,
-             // onChanged: _onSearchChanged,
+             controller: _searchController,
+              onChanged: (value) => _onSearchChanged(),
               decoration: InputDecoration(
-                labelText: 'Search',
+                labelText: 'Search Books',
                 prefixIcon: Icon(Icons.search),
                  suffixIcon:IconButton( onPressed: () {
               //_showSearchResults(context); // Show search results in AlertDialog
@@ -123,8 +134,8 @@ void _onItemTapped(int index) {
        bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        backgroundColor: Colors.white, // Custom background color
-        selectedItemColor: Colors.blue, // Custom selected item color
+        backgroundColor: Color.fromARGB(255, 49, 251, 254), // Custom background color
+        selectedItemColor: Colors.black, // Custom selected item color
         unselectedItemColor: Colors.grey, // Custom unselected item color
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed, // Custom style

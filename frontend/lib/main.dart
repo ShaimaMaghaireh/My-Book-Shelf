@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/Splash.dart';
+import 'package:frontend/login.dart';
 import 'screens/book_list_screen.dart';
 import 'package:flutter/material.dart';
 import '../models/book.dart';
 import '../services/api_service.dart';
+import 'RegisterChoice.dart';
+import 'Splash.dart';
+import 'login.dart';
+import 'signup.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Library',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: SplashScreen(),
+      home: newpage(),
     );
   }
 }
@@ -38,18 +43,18 @@ class  _newpagestate extends State <newpage>
       body: LayoutBuilder(
         builder:(context,Constraints)
         {
-          if(Constraints.maxWidth>1200)
+          if(Constraints.maxWidth>1200) //? descktop
           {
-            return BookListScreen();
+            return SplashScreen();
           }
 
-          else if(Constraints.maxWidth<=1200 && Constraints.maxWidth>=800)
+          else if(Constraints.maxWidth<=1200 && Constraints.maxWidth>=800)//?tablet
           {
-            return BookListScreen();
+            return LoginScreen();
           }
-          else
+          else //?phone
           {
-            return BookListScreen();
+            return SplashScreen();
           }
 
         

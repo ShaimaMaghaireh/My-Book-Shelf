@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/RegisterChoice.dart';
 import 'package:frontend/screens/book_list_screen.dart'; // Replace with your home screen file
+import 'login.dart';
+import 'RegisterChoice.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -19,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 10));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()), // Your next screen
+      MaterialPageRoute(builder: (context) => RegisterChoicePage()), // Your next screen
     );
   }
 
