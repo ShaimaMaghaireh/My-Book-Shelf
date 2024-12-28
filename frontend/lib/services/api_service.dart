@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:frontend/models/user.dart';
 import 'package:http/http.dart' as http;
 import '../models/book.dart';
 
@@ -48,6 +49,25 @@ final String baseUrl = "http://10.0.2.2:3001/books";  //? url for emulator
       throw Exception('Failed to load book details');
     }
   }
+
+
+ final String baseUrl2 = "http://10.0.2.2:3001/users"; // Replace with your API URL
+
+ Future<User> fetchUser() async {
+  final response = await http.get(Uri.parse(baseUrl2));
+
+  if (response.statusCode == 200) {
+    List<dynamic> data = json.decode(response.body);
+    if (data.isNotEmpty) {
+      return User.fromJson(data[0]); // Use the first user in the list
+    } else {
+      throw Exception('No user data found');
+    }
+  } else {
+    throw Exception('Failed to load user data');
+  }
+}
+
 
   // Add a new book
   Future<void> addBook(Book book) async {

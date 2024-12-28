@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/user.dart';
 import 'package:frontend/services/read_list_service.dart';
 import '../models/book.dart';
 import '../services/api_service.dart';
@@ -129,6 +130,14 @@ Future<void> _downloadPDF(String url, String title) async {
     );
   },
 ),
+ListTile(
+              title: Text('Profile'),
+              onTap: () {
+                // Handle item tap
+    Navigator.push( context, MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -156,10 +165,11 @@ Future<void> _downloadPDF(String url, String title) async {
               ),
             ),
           ),
-
+          Text('data'),
           Container(
             width: 400,
             height: 700,
+            color: Colors.cyan,
             child: FutureBuilder<List<Book>>(
               future: books,
               builder: (context, snapshot) {
@@ -170,7 +180,7 @@ Future<void> _downloadPDF(String url, String title) async {
                 } else if (snapshot.hasData) {
                   List<Book> books = snapshot.data!;
                   return ListView.builder(
-                   
+                   scrollDirection: Axis.horizontal,
                     itemCount: books.length,
                     itemBuilder: (context, index)
                      {
@@ -187,7 +197,7 @@ Future<void> _downloadPDF(String url, String title) async {
                      semanticContainer: true,
                      clipBehavior: Clip.antiAliasWithSaveLayer,
                       child:Column(children: [
-                      Image.network(books[index].image,fit: BoxFit.fill),
+                      Image.network(books[index].image,fit: BoxFit.fill,width: 380,height: 490,),
                       Text(books[index].title,style: TextStyle(fontSize:25,color:Color.fromARGB(255, 51, 97, 178) ),),
                       Text(books[index].author,style: TextStyle(fontWeight: FontWeight.bold),),
                       IconButton(
@@ -200,14 +210,11 @@ Future<void> _downloadPDF(String url, String title) async {
                        
                     ],),
                       shape: RoundedRectangleBorder(
-                     borderRadius: BorderRadius.circular(10.0),),
-                      // ),
+                      borderRadius: BorderRadius.circular(50.0),),
                       elevation: 5,
-                      margin: EdgeInsets.all(50),
+                      margin: EdgeInsets.all(20),
                     ),
                   );
-
-
                     },
                   );
                 } else {
@@ -503,3 +510,130 @@ class _BookReviewScreenState extends State<BookReviewScreen> {
   }
 }
  
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  late Future<User> user; // Future to fetch user data
+
+  @override
+  void initState() {
+    super.initState();
+    user = ApiService().fetchUser(); // Fetch user information from MongoDB
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xFF6AD6F7),
+        elevation: 0,
+        title: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: FutureBuilder<User>(
+        future: user,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            User user = snapshot.data!;
+            return Column(
+              children: [
+                _buildHeader(context, user),
+                Expanded(child: _buildMenuOptions()),
+              ],
+            );
+          } else {
+            return Center(child: Text('No user data found.'));
+          }
+        },
+      ),
+    );
+  }
+
+  // Header Section
+  Widget _buildHeader(BuildContext context, User user) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0xFF6AD6F7),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(40),
+          bottomRight: Radius.circular(40),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundImage: NetworkImage(user.profileImage),
+            ),
+            SizedBox(height: 16),
+            Text(
+              user.name,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'View Full Profile',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white70,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Menu Options
+  Widget _buildMenuOptions() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _buildMenuItem(Icons.person, 'Account Information'),
+        _buildMenuItem(Icons.lock, 'Password'),
+        _buildMenuItem(Icons.settings, 'Settings'),
+        _buildMenuItem(Icons.help, 'Help & Support'),
+        _buildMenuItem(Icons.logout, 'Log Out', color: Colors.red),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, {Color? color}) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ListTile(
+        leading: Icon(icon, color: color ?? Colors.black),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        onTap: () {
+          // Define actions for menu items here
+        },
+      ),
+    );
+  }
+}

@@ -33,13 +33,13 @@ const userSchema = new mongoose.Schema({
     name: String,
     email: String,
     password:String,
-    borrowedBooks: [
-        {
-            bookId: mongoose.Schema.Types.ObjectId,
-            borrowedOn: { type: Date, default: Date.now }
-        }
-    ],
-    readList: [mongoose.Schema.Types.ObjectId]
+    // borrowedBooks: [
+    //     {
+    //         bookId: mongoose.Schema.Types.ObjectId,
+    //         borrowedOn: { type: Date, default: Date.now }
+    //     }
+    // ],
+    // readList: [mongoose.Schema.Types.ObjectId]
 });
 
 //? Define models
