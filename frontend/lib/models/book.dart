@@ -4,8 +4,8 @@ class Book {
   final int availableCopies;
   final int totalCopies;
   final String image;
-
-  Book({required this.title, required this.author, required this.availableCopies, required this.totalCopies, required this.image});
+  final String pdf; 
+  Book({required this.title, required this.author, required this.availableCopies, required this.totalCopies, required this.image, required this.pdf});
 
 
   // Convert a Map object into a Book object
@@ -16,6 +16,7 @@ class Book {
       availableCopies:json['availableCopies'],
       totalCopies:json['totalCopies'],
       image:json['image']?? 'Not found',
+       pdf: json['pdf'],
     );
   }
 
@@ -27,6 +28,7 @@ class Book {
       'totalCopies': totalCopies,
       'availableCopies': availableCopies,
       'image':image,
+      'pdf':pdf,
     };
   }
 }

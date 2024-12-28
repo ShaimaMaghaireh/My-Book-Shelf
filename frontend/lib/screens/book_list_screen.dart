@@ -1,8 +1,21 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/services/read_list_service.dart';
 import '../models/book.dart';
 import '../services/api_service.dart';
 import 'read_list_screen.dart';
+import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+
+String _getFilePath(String title) {
+  final directory = Directory('/storage/emulated/0/Download');
+  return '${directory.path}/$title.pdf';
+}
+
 
 
 class BookListScreen extends StatefulWidget {
@@ -34,6 +47,52 @@ void _onItemTapped(int index) {
       }
     });
   }
+
+  Future<bool> _requestStoragePermission() async {
+  var status = await Permission.storage.status;
+  if (!status.isGranted) {
+    status = await Permission.storage.request();
+  }
+  return status.isGranted;
+}
+  void checkpermissions() async { 
+  var status = await Permission.camera.status;
+   if (!status.isGranted)
+    { await Permission.camera.request(); }
+     }
+
+Future<void> _downloadPDF(String url, String title) async {
+  final dio = Dio();
+
+  try {
+    // Request storage permission
+    bool hasPermission = await _requestStoragePermission();
+    if (!hasPermission) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Storage permission is required')),
+      );
+      return;
+    }
+
+    // Define save path
+    String savePath = _getFilePath(title);
+
+    // Download file
+    await dio.download(url, savePath);
+
+    // Notify user of success
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Downloaded $title to Downloads folder')),
+    );
+  } catch (e) {
+    // Notify user of failure
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to download file: $e')),
+    );
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +119,14 @@ void _onItemTapped(int index) {
                 );
               },
             ),
+    //         ListTile(
+    //           title: Text('Download Books'),
+    //           onTap: () {
+    //             // Handle item tap
+    // Navigator.push( context, MaterialPageRoute(builder: (context) => DownloadBookScreen()),
+    //             );
+    //           },
+    //         ),
           ],
         ),
       ),
@@ -112,6 +179,24 @@ void _onItemTapped(int index) {
                     Image.network(books[index].image,fit: BoxFit.fill),
                     Text(books[index].title,style: TextStyle(fontSize:25,color:Color.fromARGB(255, 51, 97, 178) ),),
                     Text(books[index].author,style: TextStyle(fontWeight: FontWeight.bold),),
+                    IconButton(
+                     icon: Icon(Icons.download),
+                     onPressed: () async {
+                      print('object');
+                     await _downloadPDF(books[index].pdf, 
+                     books[index].title
+                     );
+                         },
+                          ),
+//                     IconButton(
+//   icon: Icon(Icons.download),
+//   onPressed: () async {
+//     await _downloadPDF(
+//       'https://example.com/path-to-your-pdf.pdf',
+//       'SampleBook',
+//     );
+//   },
+// ),
 ],),
   shape: RoundedRectangleBorder(
  borderRadius: BorderRadius.circular(10.0),),
@@ -307,3 +392,4 @@ class AboutScreen extends StatelessWidget {
     );
   }
 }
+

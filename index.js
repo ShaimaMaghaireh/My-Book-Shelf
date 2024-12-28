@@ -6,7 +6,8 @@ const express = require('express'); // Web framework for Node.js
 const mongoose = require('mongoose'); // MongoDB ODM
 const bodyParser = require('body-parser'); // Parses incoming request bodies
 const app = express();
-const PORT = 3001;
+const PORT = 3002;
+const multer = require('multer');//? for uploading files
 
 //? Middleware to parse JSON bodies
 app.use(bodyParser.json());
@@ -26,6 +27,7 @@ const bookSchema = new mongoose.Schema({
     availableCopies: Number,
     totalCopies: Number,
     image:String,
+    pdf: String,
 });
 
 //? User schema for storing user details
@@ -136,6 +138,66 @@ app.post('/login', async (req, res) => {
     }
 });
 
+//? Configure storage for uploaded files
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // Directory to store files
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname); // Use unique filenames
+    },
+});
+
+// Initialize the upload middleware
+const upload = multer({ storage: storage });
+
+// Add a new book with a PDF file
+app.post('/books', upload.single('pdf'), async (req, res) => {
+    try {
+        const { title, author, availableCopies, totalCopies, image } = req.body;
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'PDF file is required' });
+        }
+
+        const newBook = new Book({
+            title,
+            author,
+            availableCopies,
+            totalCopies,
+            image,
+            pdf: `/uploads/${req.file.filename}`, // Save the file path
+        });
+
+        await newBook.save();
+        res.status(201).json({ message: 'Book added successfully', book: newBook });
+    } catch (err) {
+        console.error('Error adding book:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+//?download the books
+app.get('/books/:id/download', async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id);
+
+        if (!book || !book.pdf) {
+            return res.status(404).json({ error: 'Book or file not found' });
+        }
+
+        // Send the file to the client
+        res.download(`.${book.pdf}`, `${book.title}.pdf`, (err) => {
+            if (err) {
+                console.error('Error downloading file:', err);
+                res.status(500).json({ error: 'Error downloading file' });
+            }
+        });
+    } catch (err) {
+        console.error('Error fetching book:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 //? Get all books
 app.get('/books', async (req, res) => {
