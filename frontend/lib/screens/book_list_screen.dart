@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'book_Details_Screen.dart';
-
+import 'package:image_picker/image_picker.dart';
 String _getFilePath(String title) {
   final directory = Directory('/storage/emulated/0/Download');
   return '${directory.path}/$title.pdf';
@@ -165,11 +165,9 @@ ListTile(
               ),
             ),
           ),
-          Text('data'),
           Container(
-            width: 400,
-            height: 700,
-            color: Colors.cyan,
+            width: 150,
+            height: 550,
             child: FutureBuilder<List<Book>>(
               future: books,
               builder: (context, snapshot) {
@@ -197,7 +195,7 @@ ListTile(
                      semanticContainer: true,
                      clipBehavior: Clip.antiAliasWithSaveLayer,
                       child:Column(children: [
-                      Image.network(books[index].image,fit: BoxFit.fill,width: 380,height: 490,),
+                      Image.network(books[index].image,fit: BoxFit.fill,width: 280,height: 390,),
                       Text(books[index].title,style: TextStyle(fontSize:25,color:Color.fromARGB(255, 51, 97, 178) ),),
                       Text(books[index].author,style: TextStyle(fontWeight: FontWeight.bold),),
                       IconButton(
@@ -517,11 +515,43 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late Future<User> user; // Future to fetch user data
-
+  File? _selectedImage;
   @override
   void initState() {
     super.initState();
-    user = ApiService().fetchUser(); // Fetch user information from MongoDB
+    user = ApiService().fetchUser(); //? Fetch user information from MongoDB
+  }
+ Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _updateProfileImage(String userId) async {
+    if (_selectedImage == null) return;
+
+    // Convert image to base64
+    String base64Image = base64Encode(await _selectedImage!.readAsBytes());
+
+    // Update user profile image in MongoDB
+    final response = await http.put(
+      Uri.parse('https://your-api-url.com/users/$userId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'profileImage': base64Image}),
+    );
+
+    if (response.statusCode == 200) {
+      // Refresh user data after successful update
+      setState(() {
+        user = ApiService().fetchUser();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile image updated successfully!')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile image.')));
+    }
   }
 
   @override
@@ -576,9 +606,18 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(user.profileImage),
+            // CircleAvatar(
+            //   radius: 50,
+            //   backgroundImage: NetworkImage(user.profileImage),
+            // ),
+             GestureDetector(
+              onTap: _pickImage, // Open image picker when the avatar is tapped
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: _selectedImage != null
+                    ? FileImage(_selectedImage!)
+                    : NetworkImage(user.profileImage) as ImageProvider,
+              ),
             ),
             SizedBox(height: 16),
             Text(
@@ -590,13 +629,17 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             SizedBox(height: 8),
-            Text(
-              'View Full Profile',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white70,
-              ),
+             ElevatedButton(
+              onPressed: () => _updateProfileImage(user.name),
+              child: Text('Update Profile Image'),
             ),
+            // Text(
+            //   'View Full Profile',
+            //   style: TextStyle(
+            //     fontSize: 16,
+            //     color: Colors.white70,
+            //   ),
+            // ),
           ],
         ),
       ),
