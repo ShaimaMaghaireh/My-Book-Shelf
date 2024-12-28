@@ -4,7 +4,7 @@ import '../models/book.dart';
 
 class ApiService {
 
-final String baseUrl = "http://10.0.2.2:3002/books";  //? url for emulator
+final String baseUrl = "http://10.0.2.2:3001/books";  //? url for emulator
  //final String baseUrl='http://127.0.0.1:3001/books';  //?url for windows
  //final String baseUrl='http://10.0.2.2:3001/books'; //? url for chrome
 //final String baseUrl='http://192.168.100.114:3001/books'; //? myphone
@@ -38,6 +38,16 @@ final String baseUrl = "http://10.0.2.2:3002/books";  //? url for emulator
     }
   }
 
+
+   Future<Book> fetchBookByTitle(String bookTitle) async {
+    final response = await http.get(Uri.parse(baseUrl));
+    //('$baseUrl/books/title/$bookTitle')
+    if (response.statusCode == 200) {
+      return Book.fromJson(json.decode(response.body));  // Assuming your Book model has a fromJson method
+    } else {
+      throw Exception('Failed to load book details');
+    }
+  }
 
   // Add a new book
   Future<void> addBook(Book book) async {

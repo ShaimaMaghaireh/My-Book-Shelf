@@ -1,12 +1,10 @@
 //? Import required libraries
-// const cors=require('cors');
-// app.use(cors());
-
+const cors=require('cors');
 const express = require('express'); // Web framework for Node.js
 const mongoose = require('mongoose'); // MongoDB ODM
 const bodyParser = require('body-parser'); // Parses incoming request bodies
 const app = express();
-const PORT = 3002;
+const PORT = 3001;
 const multer = require('multer');//? for uploading files
 
 //? Middleware to parse JSON bodies
@@ -282,26 +280,26 @@ app.post('/read-list', async (req, res) => {
 });
 
 //? Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+// app.listen(PORT, () => {
+//     console.log(`Server running on http://localhost:${PORT}`);
+// });
 
 
-// app.listen(PORT, '0.0.0.0', () => {
-//     console.log(`Server is running on http://${getIPAddress()}:${PORT}`);
-//   });
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on http://${getIPAddress()}:${PORT}`);
+  });
   
-//   function getIPAddress() {
-//     const { networkInterfaces } = require('os');
-//     const nets = networkInterfaces();
-//     for (const name of Object.keys(nets)) {
-//         for (const net of nets[name]) {
-//             // Skip over non-IPv4 and internal (i.e., 127.0.0.1) addresses
-//             if (net.family === 'IPv4' && !net.internal) {
-//                 return net.address;
+  function getIPAddress() {
+    const { networkInterfaces } = require('os');
+    const nets = networkInterfaces();
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            // Skip over non-IPv4 and internal (i.e., 127.0.0.1) addresses
+            if (net.family === 'IPv4' && !net.internal) {
+                return net.address;
   
   
-//             }
-//         }
-//     }
-//   }
+            }
+        }
+    }
+  }

@@ -9,7 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'book_Details_Screen.dart';
 
 String _getFilePath(String title) {
   final directory = Directory('/storage/emulated/0/Download');
@@ -27,6 +27,7 @@ class _BookListScreenState extends State<BookListScreen> {
   late Future<List<Book>> books;
   TextEditingController _searchController = TextEditingController();
  int _selectedIndex = 0;
+ 
   @override
   void initState() {
     super.initState();
@@ -119,14 +120,15 @@ Future<void> _downloadPDF(String url, String title) async {
                 );
               },
             ),
-    //         ListTile(
-    //           title: Text('Download Books'),
-    //           onTap: () {
-    //             // Handle item tap
-    // Navigator.push( context, MaterialPageRoute(builder: (context) => DownloadBookScreen()),
-    //             );
-    //           },
-    //         ),
+           ListTile(
+  title: Text('Book Review'),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BookReviewScreen()),
+    );
+  },
+),
           ],
         ),
       ),
@@ -172,38 +174,38 @@ Future<void> _downloadPDF(String url, String title) async {
                     itemCount: books.length,
                     itemBuilder: (context, index)
                      {
-                  return  Card(
-                 semanticContainer: true,
-                 clipBehavior: Clip.antiAliasWithSaveLayer,
-                    child:Column(children: [
-                    Image.network(books[index].image,fit: BoxFit.fill),
-                    Text(books[index].title,style: TextStyle(fontSize:25,color:Color.fromARGB(255, 51, 97, 178) ),),
-                    Text(books[index].author,style: TextStyle(fontWeight: FontWeight.bold),),
-                    IconButton(
-                     icon: Icon(Icons.download),
-                     onPressed: () async {
-                      print('object');
-                     await _downloadPDF(books[index].pdf, 
-                     books[index].title
-                     );
-                         },
+                  return InkWell(
+                    onTap: () {
+                     Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookDetailsScreen(book: books[index]),
                           ),
-//                     IconButton(
-//   icon: Icon(Icons.download),
-//   onPressed: () async {
-//     await _downloadPDF(
-//       'https://example.com/path-to-your-pdf.pdf',
-//       'SampleBook',
-//     );
-//   },
-// ),
-],),
-  shape: RoundedRectangleBorder(
- borderRadius: BorderRadius.circular(10.0),),
-  // ),
-  elevation: 5,
-  margin: EdgeInsets.all(50),
-);
+                        );
+                  },
+                    child: Card(
+                     semanticContainer: true,
+                     clipBehavior: Clip.antiAliasWithSaveLayer,
+                      child:Column(children: [
+                      Image.network(books[index].image,fit: BoxFit.fill),
+                      Text(books[index].title,style: TextStyle(fontSize:25,color:Color.fromARGB(255, 51, 97, 178) ),),
+                      Text(books[index].author,style: TextStyle(fontWeight: FontWeight.bold),),
+                      IconButton(
+                       icon: Icon(Icons.download),
+                       onPressed: () async {
+                        print('object');
+                       await _downloadPDF(books[index].pdf, 
+                       books[index].title
+                       ); }, ),
+                       
+                    ],),
+                      shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(10.0),),
+                      // ),
+                      elevation: 5,
+                      margin: EdgeInsets.all(50),
+                    ),
+                  );
 
 
                     },
@@ -393,3 +395,111 @@ class AboutScreen extends StatelessWidget {
   }
 }
 
+class BookReviewScreen extends StatefulWidget {
+  @override
+  _BookReviewScreenState createState() => _BookReviewScreenState();
+}
+
+class _BookReviewScreenState extends State<BookReviewScreen> {
+  late Future<List<Book>> books;
+
+  @override
+  void initState() {
+    super.initState();
+    books = ApiService().fetchBooks(); // Fetch the list of books
+  }
+
+  // Function to handle the review submission
+  void _submitReview(Book book, String review) {
+    // Here you can send the review to the backend for saving
+    // Example API call can be implemented in your ApiService
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Review for "${book.title}" saved successfully')),
+    );
+    Navigator.pop(context); // Close the dialog
+  }
+
+  // Function to display the review dialog
+  void _showReviewDialog(BuildContext context, Book book) {
+    final TextEditingController _reviewController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Review: ${book.title}'),
+          content: TextField(
+            controller: _reviewController,
+            maxLines: 5,
+            decoration: InputDecoration(
+              labelText: 'Write your review',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_reviewController.text.isNotEmpty) {
+                  _submitReview(book, _reviewController.text);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Review cannot be empty')),
+                  );
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xFF6AD6F7),
+        title: Text(
+          'Book Reviews',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: FutureBuilder<List<Book>>(
+        future: books,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            List<Book> books = snapshot.data!;
+            return ListView.builder(
+              itemCount: books.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: Image.network(
+                    books[index].image,
+                    fit: BoxFit.cover,
+                    width: 50,
+                    height: 50,
+                  ),
+                  title: Text(books[index].title),
+                  subtitle: Text(books[index].author),
+                  trailing: Icon(Icons.edit),
+                  onTap: () => _showReviewDialog(context, books[index]),
+                );
+              },
+            );
+          } else {
+            return Center(child: Text('No books available.'));
+          }
+        },
+      ),
+    );
+  }
+}
+ 
