@@ -280,26 +280,26 @@ app.post('/read-list', async (req, res) => {
 });
 
 //? Start the server
-// app.listen(PORT, () => {
-//     console.log(`Server running on http://localhost:${PORT}`);
-// });
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
 
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on http://${getIPAddress()}:${PORT}`);
-  });
+// app.listen(PORT, '0.0.0.0', () => {
+//     console.log(`Server is running on http://${getIPAddress()}:${PORT}`);
+//   });
   
-  function getIPAddress() {
-    const { networkInterfaces } = require('os');
-    const nets = networkInterfaces();
-    for (const name of Object.keys(nets)) {
-        for (const net of nets[name]) {
-            // Skip over non-IPv4 and internal (i.e., 127.0.0.1) addresses
-            if (net.family === 'IPv4' && !net.internal) {
-                return net.address;
+//   function getIPAddress() {
+//     const { networkInterfaces } = require('os');
+//     const nets = networkInterfaces();
+//     for (const name of Object.keys(nets)) {
+//         for (const net of nets[name]) {
+//             // Skip over non-IPv4 and internal (i.e., 127.0.0.1) addresses
+//             if (net.family === 'IPv4' && !net.internal) {
+//                 return net.address;
   
   
-            }
-        }
-    }
-  }
+//             }
+//         }
+//     }
+//   }
