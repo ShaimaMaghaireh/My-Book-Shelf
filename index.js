@@ -1,15 +1,22 @@
 //? Import required libraries
-const cors=require('cors');
+//const cors =require('cors');
 const express = require('express'); // Web framework for Node.js
 const mongoose = require('mongoose'); // MongoDB ODM
 const bodyParser = require('body-parser'); // Parses incoming request bodies
 const app = express();
 const PORT = 3001;
-const multer = require('multer');//? for uploading files
+//const multer = require('multer');//? for uploading files
 
 //? Middleware to parse JSON bodies
 app.use(bodyParser.json());
-
+// Increase payload limit to 10MB (or more if needed)
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+app.use((req, res, next) => {
+    console.log(`Incoming request size: ${req.headers['content-length']} bytes`);
+    next();
+  });
+//app.use(cors);
 //? MongoDB Atlas connection
 mongoose.connect('mongodb+srv://ShaimaM:sam2512@cluster0.yfwht.mongodb.net/Library', 
 { useNewUrlParser: true, useUnifiedTopology: true })
@@ -42,10 +49,20 @@ const userSchema = new mongoose.Schema({
     // readList: [mongoose.Schema.Types.ObjectId]
 });
 
+//? Popular Book schema for storing book details
+const popularSchema = new mongoose.Schema({
+    title1: String,
+    author: String,
+    image1: String,
+    rating: Number,
+    isFavorite: Boolean,
+    description: String,
+});
+
 //? Define models
 const Book = mongoose.model('books', bookSchema);
 const User = mongoose.model('users', userSchema);
-
+const Popular = mongoose.model('popular', popularSchema);
 //? API Endpoints
 
 
@@ -136,44 +153,44 @@ app.post('/login', async (req, res) => {
     }
 });
 
-//? Configure storage for uploaded files
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Directory to store files
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname); // Use unique filenames
-    },
-});
+// //? Configure storage for uploaded files
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, 'uploads/'); // Directory to store files
+//     },
+//     filename: function (req, file, cb) {
+//         cb(null, Date.now() + '-' + file.originalname); // Use unique filenames
+//     },
+// });
 
 // Initialize the upload middleware
-const upload = multer({ storage: storage });
+//const upload = multer({ storage: storage });
 
 // Add a new book with a PDF file
-app.post('/books', upload.single('pdf'), async (req, res) => {
-    try {
-        const { title, author, availableCopies, totalCopies, image } = req.body;
+// app.post('/books', upload.single('pdf'), async (req, res) => {
+//     try {
+//         const { title, author, availableCopies, totalCopies, image } = req.body;
 
-        if (!req.file) {
-            return res.status(400).json({ error: 'PDF file is required' });
-        }
+//         if (!req.file) {
+//             return res.status(400).json({ error: 'PDF file is required' });
+//         }
 
-        const newBook = new Book({
-            title,
-            author,
-            availableCopies,
-            totalCopies,
-            image,
-            pdf: `/uploads/${req.file.filename}`, // Save the file path
-        });
+//         const newBook = new Book({
+//             title,
+//             author,
+//             availableCopies,
+//             totalCopies,
+//             image,
+//             pdf: `/uploads/${req.file.filename}`, // Save the file path
+//         });
 
-        await newBook.save();
-        res.status(201).json({ message: 'Book added successfully', book: newBook });
-    } catch (err) {
-        console.error('Error adding book:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
+//         await newBook.save();
+//         res.status(201).json({ message: 'Book added successfully', book: newBook });
+//     } catch (err) {
+//         console.error('Error adding book:', err);
+//         res.status(500).json({ error: 'Server error' });
+//     }
+// });
 
 //?download the books
 app.get('/books/:id/download', async (req, res) => {
@@ -217,6 +234,47 @@ app.get('/users', async (req, res) => {
         res.status(500).json({ error: 'Error fetching users' });
     }
 });
+
+app.put('/users/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { profileImage } = req.body;
+  
+      if (!profileImage) {
+        return res.status(400).send({ error: 'Profile image is required' });
+      }
+  
+      // Example: Update MongoDB user profile
+      const user = await User.findByIdAndUpdate(userId, { profileImage }, { new: true });
+  
+      if (!user) {
+        return res.status(404).send({ error: 'User not found' });
+      }
+  
+      res.status(200).send(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error: 'Server error' });
+    }
+  });
+//? Fetch all popular books
+app.get("/popular", async (req, res) => {
+    try {
+        const popularBooks = await Popular.find();
+        res.json(popularBooks);
+    } catch (err) {
+        res.status(500).send("Error fetching popular books: " + err.message);
+    }
+});
+
+//? Update favorite status for popular books
+app.put("/popular/:id", async (req, res) => {
+    const { id } = req.params;
+    const { isFavorite } = req.body;
+    const book = await Book.findByIdAndUpdate(id, { isFavorite }, { new: true });
+    res.json(book);
+});
+
 
 //todo Search books by title
 app.get('/search-books', async (req, res) => {
@@ -280,26 +338,24 @@ app.post('/read-list', async (req, res) => {
 });
 
 //? Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+// app.listen(PORT, () => {
+//     console.log(`Server running on http://localhost:${PORT}`);
+// });
 
 
-// app.listen(PORT, '0.0.0.0', () => {
-//     console.log(`Server is running on http://${getIPAddress()}:${PORT}`);
-//   });
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on http://${getIPAddress()}:${PORT}`);
+  });
   
-//   function getIPAddress() {
-//     const { networkInterfaces } = require('os');
-//     const nets = networkInterfaces();
-//     for (const name of Object.keys(nets)) {
-//         for (const net of nets[name]) {
-//             // Skip over non-IPv4 and internal (i.e., 127.0.0.1) addresses
-//             if (net.family === 'IPv4' && !net.internal) {
-//                 return net.address;
-  
-  
-//             }
-//         }
-//     }
-//   }
+  function getIPAddress() {
+    const { networkInterfaces } = require('os');
+    const nets = networkInterfaces();
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            // Skip over non-IPv4 and internal (i.e., 127.0.0.1) addresses
+            if (net.family === 'IPv4' && !net.internal) {
+                return net.address;
+            }
+        }
+    }
+  }

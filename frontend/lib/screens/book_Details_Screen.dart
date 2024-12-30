@@ -1,54 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/popular.dart';
 import 'package:frontend/services/api_service.dart';  // Assuming ApiService has a fetchBookByTitle method
 import '../models/book.dart';
-
-// class BookDetailsScreen extends StatelessWidget {
-//   final Book book;
-
-//   // Constructor to receive the book details
-//   BookDetailsScreen({required this.book});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(book.title),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Image.network(book.image), // Book image
-//             SizedBox(height: 10),
-//             Text(
-//               book.title,
-//               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 10),
-//             Text(
-//               'Author: ${book.author}',
-//               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 10),
-//             Text('Available Copies: ${book.availableCopies}', style: TextStyle(fontSize: 16)),
-//             Text('Total Copies: ${book.totalCopies}', style: TextStyle(fontSize: 16)),
-//             SizedBox(height: 10),
-//             ElevatedButton(
-//               onPressed: () {
-//                 // Add action to borrow or add to read list, etc.
-//               },
-//               child: Text('Borrow'),
-//             ),
-//             // Add other book details like description, etc. if needed
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
+import '../models/popular.dart';
 class BookDetailsScreen extends StatefulWidget {
   final Book book;
 
@@ -118,70 +72,59 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
     );
   }
 }
-// class BookDetailsScreen extends StatefulWidget {
-// final String bookTitle; // Passing bookTitle to fetch book details
+// Import your PopularBook model
 
-//   BookDetailsScreen({required this.bookTitle});
+class PopularBookDetailsScreen extends StatefulWidget {
+  final popularBook popularBooks;
 
-//   @override
-//   _BookDetailsScreenState createState() => _BookDetailsScreenState();
-// }
+  const PopularBookDetailsScreen({Key? key, required this.popularBooks}) : super(key: key);
 
-// class _BookDetailsScreenState extends State<BookDetailsScreen> {
-//   late Future<Book> bookDetails;
+  @override
+  _PopularBookDetailsScreenState createState() => _PopularBookDetailsScreenState();
+}
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     //? Fetch book details when the screen is loaded
-//     bookDetails = ApiService().fetchBookByTitle(widget.bookTitle);
-//   }
+class _PopularBookDetailsScreenState extends State<PopularBookDetailsScreen> {
+  bool isFavorite = false; // Example of a dynamic state variable
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         backgroundColor: Color(0xFF6AD6F7),
-//         title: Text('Book Details', style: TextStyle(fontWeight: FontWeight.bold)),
-//       ),
-//       body: FutureBuilder<Book>(
-//         future: bookDetails,
-//         builder: (context, snapshot) {
-//           if (snapshot.connectionState == ConnectionState.waiting) {
-//             return Center(child: CircularProgressIndicator());
-//           } else if (snapshot.hasError) {
-//             return Center(child: Text('Error: ${snapshot.error}'));
-//           } else if (snapshot.hasData) {
-//             final book = snapshot.data!;
-//             return Padding(
-//               padding: const EdgeInsets.all(16.0),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Image.network(book.image, fit: BoxFit.cover),
-//                   SizedBox(height: 16),
-//                   Text(book.title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-//                   Text('by ${book.author}', style: TextStyle(fontSize: 18)),
-//                   SizedBox(height: 16),
-//                   Text('Available Copies: ${book.availableCopies}', style: TextStyle(fontSize: 16)),
-//                   Text('Total Copies: ${book.totalCopies}', style: TextStyle(fontSize: 16)),
-//                   SizedBox(height: 16),
-//                   ElevatedButton(
-//                     onPressed: () {
-//                       // Handle book borrowing or any other actions
-//                     },
-//                     child: Text('Borrow this Book'),
-//                   ),
-//                   SizedBox(height: 16),
-//                   Text('PDF Link: ${book.pdf}', style: TextStyle(fontSize: 16)),
-//                 ],
-//               ),
-//             );
-//           } else {
-//             return Center(child: Text('No book data available.'));
-//           }
-//         },
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.popularBooks.title1),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(widget.popularBooks.image1), // Display the book's image
+            const SizedBox(height: 16),
+            Text(
+              widget.popularBooks.title1,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Rating: ${widget.popularBooks.rating}',
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              widget.popularBooks.description ?? "No description available.",
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isFavorite = !isFavorite;
+                });
+              },
+              child: Text(isFavorite ? 'Remove from Favorites' : 'Add to Favorites'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

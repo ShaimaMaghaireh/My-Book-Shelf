@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/popular.dart';
 import 'package:frontend/models/user.dart';
 import 'package:frontend/services/read_list_service.dart';
 import '../models/book.dart';
@@ -12,11 +13,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'book_Details_Screen.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 String _getFilePath(String title) {
   final directory = Directory('/storage/emulated/0/Download');
   return '${directory.path}/$title.pdf';
 }
-
 
 
 class BookListScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class BookListScreen extends StatefulWidget {
 
 class _BookListScreenState extends State<BookListScreen> {
   late Future<List<Book>> books;
+  late Future<List<popularBook>> popularBooks;
   TextEditingController _searchController = TextEditingController();
  int _selectedIndex = 0;
  
@@ -33,7 +35,18 @@ class _BookListScreenState extends State<BookListScreen> {
   void initState() {
     super.initState();
     books = ApiService().fetchBooks();
+    popularBooks = ApiService().fetchPopularBooks(); // Fetch popular books
   }
+
+
+  void _toggleFavorite(popularBook book) async {
+    setState(() {
+      book.isFavorite = !book.isFavorite;
+    });
+
+    await ApiService().updateFavoriteStatus(book.id, book.isFavorite);
+  }
+
 void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index; //? Update the selected index in bottom navigation bar
@@ -44,7 +57,9 @@ void _onItemTapped(int index) {
     setState(() {
       if (_searchController.text.isNotEmpty) {
         books = ApiService().searchBooks(_searchController.text);//? search for books based on title
-      } else {
+
+      } 
+      else {
         books = ApiService().fetchBooks();  //?fethc the book after search
       }
     });
@@ -220,6 +235,78 @@ ListTile(
                 }
               },
             ),
+          ),
+
+Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Popular Books',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+          FutureBuilder<List<popularBook>>(
+            future: popularBooks,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (snapshot.hasData) {
+                List<popularBook> popularBooks = snapshot.data!;
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                  ),
+                  itemCount: popularBooks.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                            PopularBookDetailsScreen(popularBooks:popularBooks[index]),
+                          ),
+                        );
+                      },
+                      child: Card(
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: Image.network(
+                                popularBooks[index].image1,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            ListTile(
+                              title: Text(popularBooks[index].title1),
+                              trailing: IconButton(
+                                icon: Icon(
+                                  popularBooks[index].isFavorite
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color: popularBooks[index].isFavorite
+                                      ? Colors.yellow
+                                      : Colors.grey,
+                                ),
+                                onPressed: () =>
+                        _toggleFavorite(popularBooks[index]
+                       ),
+                       ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              } else {
+                return Center(child: Text('No popular books available.'));
+              }
+            },
           ),
         ],
       ),
@@ -529,7 +616,12 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     }
   }
-
+Future<File> resizeImage(File file) async {
+  final originalImage = img.decodeImage(file.readAsBytesSync());
+  final resizedImage = img.copyResize(originalImage!, width: 300);
+  final resizedFile = File(file.path)..writeAsBytesSync(img.encodeJpg(resizedImage));
+  return resizedFile;
+}
   Future<void> _updateProfileImage(String userId) async {
     if (_selectedImage == null) return;
 
@@ -538,7 +630,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Update user profile image in MongoDB
     final response = await http.put(
-      Uri.parse('https://your-api-url.com/users/$userId'),
+      Uri.parse('http://192.168.100.90:3001/users/$userId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'profileImage': base64Image}),
     );
@@ -606,10 +698,6 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
         child: Column(
           children: [
-            // CircleAvatar(
-            //   radius: 50,
-            //   backgroundImage: NetworkImage(user.profileImage),
-            // ),
              GestureDetector(
               onTap: _pickImage, // Open image picker when the avatar is tapped
               child: CircleAvatar(
@@ -633,13 +721,6 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () => _updateProfileImage(user.name),
               child: Text('Update Profile Image'),
             ),
-            // Text(
-            //   'View Full Profile',
-            //   style: TextStyle(
-            //     fontSize: 16,
-            //     color: Colors.white70,
-            //   ),
-            // ),
           ],
         ),
       ),

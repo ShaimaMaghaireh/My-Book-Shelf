@@ -1,19 +1,21 @@
 import 'dart:convert';
+import 'package:frontend/models/popular.dart';
 import 'package:frontend/models/user.dart';
 import 'package:http/http.dart' as http;
 import '../models/book.dart';
 
 class ApiService {
 
-final String baseUrl = "http://10.0.2.2:3001/books";  //? url for emulator
+//final String baseUrl = "http://10.0.2.2:3001/books";  //? url for emulator
 //final String baseUrl='http://127.0.0.1:3001/books';  //?url for windows
 //final String baseUrl='http://10.0.2.2:3001/books'; //? url for chrome
-//final String baseUrl='http://192.168.100.114:3001/books'; //? myphone
+// final String baseUrl='http://192.168.100.114:3001/books'; //? myphone
+final String baseUrl='http://192.168.100.90:3001/books'; //? myphone
 
 //? Fetch all books
   Future<List<Book>> fetchBooks() async {
     final response = await http.get(Uri.parse(baseUrl));
-    print('shaima?????');
+   // print('shaima?????');
      print(baseUrl);
 
     if (response.statusCode == 200) {
@@ -23,7 +25,20 @@ final String baseUrl = "http://10.0.2.2:3001/books";  //? url for emulator
       throw Exception("Failed to load books");
     }
   }
+//todo: Fetch popular books
+   final String baseUrl3 = "http://192.168.100.90:3001/popular";
+    //final String baseUrl3 = "http://10.0.2.2:3001/popular";//?for emulator
+  Future<List<popularBook>> fetchPopularBooks() async {
+    final response = await http.get(Uri.parse(baseUrl3));
 
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((json) => popularBook.fromJson(json)).toList();
+    } else {
+      print('object');
+      throw Exception('Failed to fetch popular book');
+    }
+  }
 
  //todo: Fetch books based on a search query
   Future<List<Book>> searchBooks(String query) async {
@@ -50,19 +65,9 @@ final String baseUrl = "http://10.0.2.2:3001/books";  //? url for emulator
     }
   }
 
-
- final String baseUrl2 = "http://10.0.2.2:3001/users"; // Replace with your API URL
-
-  // Future<User> fetchUser() async {
-  //   final response = await http.get(Uri.parse(baseUrl2));
-
-  //   if (response.statusCode == 200) {
-  //     return User.fromJson(json.decode(response.body));
-  //   } else {
-  //     throw Exception('Failed to load user data');
-  //   }
-  // }
-
+//todo: Fetch user 
+ final String baseUrl2 = "http://192.168.100.90:3001/users"; // Replace with your API URL
+//final String baseUrl2 = "http://10.0.2.2:3001/users";//?for emulator
  Future<User> fetchUser() async {
   final response = await http.get(Uri.parse(baseUrl2));
 
@@ -78,18 +83,19 @@ final String baseUrl = "http://10.0.2.2:3001/books";  //? url for emulator
   }
 }
 
-
-  // Add a new book
-  Future<void> addBook(Book book) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/books"),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(book.toJson()),
+  //? Update favorite status of a popular book
+  Future<void> updateFavoriteStatus(String id, bool isFavorite) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/popular/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'isFavorite': isFavorite}),
     );
 
-    if (response.statusCode != 201) {
-      throw Exception("Failed to add book");
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update favorite status');
     }
   }
+
+
 }
 
