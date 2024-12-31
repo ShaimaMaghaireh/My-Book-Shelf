@@ -66,12 +66,15 @@ void _onItemTapped(int index) {
   }
 
   Future<bool> _requestStoragePermission() async {
-  var status = await Permission.storage.status;
+  var status = await Permission.storage.request();
+  print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+  print(status.isGranted);
   if (!status.isGranted) {
     status = await Permission.storage.request();
   }
-  return status.isGranted;
+  return true;
 }
+
   void checkpermissions() async { 
   var status = await Permission.camera.status;
    if (!status.isGranted)
@@ -217,9 +220,12 @@ ListTile(
                        icon: Icon(Icons.download),
                        onPressed: () async {
                         print('object');
-                       await _downloadPDF(books[index].pdf, 
-                       books[index].title
-                       ); }, ),
+                        String bookId =books[index].id;//? fetch the id of the book
+                       await _downloadPDF('http://192.168.243.213:3001/books/$bookId/download', 
+                       books[index].title);
+                      //   await _downloadPDF('http://192.168.100.114:3001/books/676ba0c357ba2eeb0308f246/download', 
+                      //  books[index].title); 
+                       }, ),
                        
                     ],),
                       shape: RoundedRectangleBorder(

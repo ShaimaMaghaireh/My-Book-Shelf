@@ -195,14 +195,17 @@ app.post('/login', async (req, res) => {
 //?download the books
 app.get('/books/:id/download', async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
-
+        const bookid =req.params.id;
+        const book = await Book.findById(bookid);
+       // const book = await Book.findById(req.params.id);
+       
         if (!book || !book.pdf) {
             return res.status(404).json({ error: 'Book or file not found' });
         }
+        console.log('pdf',book.pdf)
 
         // Send the file to the client
-        res.download(`.${book.pdf}`, `${book.title}.pdf`, (err) => {
+        res.download(`${book.pdf}`, `${book.title}.pdf`, (err) => {
             if (err) {
                 console.error('Error downloading file:', err);
                 res.status(500).json({ error: 'Error downloading file' });

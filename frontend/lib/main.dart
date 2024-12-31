@@ -54,7 +54,7 @@ class  _newpagestate extends State <newpage>
           }
           else //?phone
           {
-            return BookListScreen();
+            return SplashScreen();
           }
 
         

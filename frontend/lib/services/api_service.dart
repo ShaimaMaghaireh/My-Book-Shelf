@@ -10,7 +10,7 @@ class ApiService {
 //final String baseUrl='http://127.0.0.1:3001/books';  //?url for windows
 //final String baseUrl='http://10.0.2.2:3001/books'; //? url for chrome
 // final String baseUrl='http://192.168.100.114:3001/books'; //? myphone
-final String baseUrl='http://192.168.100.90:3001/books'; //? myphone
+final String baseUrl='http://192.168.243.213:3001/books'; //? myphone
 
 //? Fetch all books
   Future<List<Book>> fetchBooks() async {
@@ -26,10 +26,12 @@ final String baseUrl='http://192.168.100.90:3001/books'; //? myphone
     }
   }
 //todo: Fetch popular books
-   final String baseUrl3 = "http://192.168.100.90:3001/popular";
+   final String baseUrl3 = "http://192.168.243.213:3001/popular";
     //final String baseUrl3 = "http://10.0.2.2:3001/popular";//?for emulator
   Future<List<popularBook>> fetchPopularBooks() async {
+    print ('object');
     final response = await http.get(Uri.parse(baseUrl3));
+
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -66,7 +68,7 @@ final String baseUrl='http://192.168.100.90:3001/books'; //? myphone
   }
 
 //todo: Fetch user 
- final String baseUrl2 = "http://192.168.100.90:3001/users"; // Replace with your API URL
+ final String baseUrl2 = "http://192.168.243.213:3001/users"; // Replace with your API URL
 //final String baseUrl2 = "http://10.0.2.2:3001/users";//?for emulator
  Future<User> fetchUser() async {
   final response = await http.get(Uri.parse(baseUrl2));
