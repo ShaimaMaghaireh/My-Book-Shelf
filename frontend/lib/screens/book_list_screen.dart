@@ -9,7 +9,6 @@ import '../services/api_service.dart';
 import 'read_list_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
-import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'book_Details_Screen.dart';
 import 'package:image_picker/image_picker.dart';
@@ -30,7 +29,7 @@ class _BookListScreenState extends State<BookListScreen> {
   late Future<List<popularBook>> popularBooks;
   TextEditingController _searchController = TextEditingController();
  int _selectedIndex = 0;
- 
+ final List<Book> readingList = [];
   @override
   void initState() {
     super.initState();
@@ -64,7 +63,8 @@ void _onItemTapped(int index) {
       }
     });
   }
-
+ 
+ 
   Future<bool> _requestStoragePermission() async {
   var status = await Permission.storage.request();
   print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
@@ -156,6 +156,14 @@ ListTile(
                 );
               },
             ),
+            ListTile(
+              title: Text('Reading List'),
+              onTap: () {
+                // Handle item tap
+              Navigator.push( context, MaterialPageRoute(builder: (context) => ReadingListPage()),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -185,7 +193,7 @@ ListTile(
           ),
           Container(
             width: 150,
-            height: 550,
+            height:480,
             child: FutureBuilder<List<Book>>(
               future: books,
               builder: (context, snapshot) {
@@ -213,19 +221,19 @@ ListTile(
                      semanticContainer: true,
                      clipBehavior: Clip.antiAliasWithSaveLayer,
                       child:Column(children: [
-                      Image.network(books[index].image,fit: BoxFit.fill,width: 280,height: 390,),
+                      Image.network(books[index].image,fit: BoxFit.fill,width: 280,height: 350,),
                       Text(books[index].title,style: TextStyle(fontSize:25,color:Color.fromARGB(255, 51, 97, 178) ),),
                       Text(books[index].author,style: TextStyle(fontWeight: FontWeight.bold),),
-                      IconButton(
-                       icon: Icon(Icons.download),
-                       onPressed: () async {
-                        print('object');
-                        String bookId =books[index].id;//? fetch the id of the book
-                       await _downloadPDF('http://192.168.243.213:3001/books/$bookId/download', 
-                       books[index].title);
-                      //   await _downloadPDF('http://192.168.100.114:3001/books/676ba0c357ba2eeb0308f246/download', 
-                      //  books[index].title); 
-                       }, ),
+                      // IconButton(
+                      //  icon: Icon(Icons.download),
+                      //  onPressed: () async {
+                      //   print('object');
+                      //   String bookId =books[index].id;//? fetch the id of the book
+                      //  await _downloadPDF('http://192.168.243.213:3001/books/$bookId/download', 
+                      //  books[index].title);
+                      // //   await _downloadPDF('http://192.168.100.114:3001/books/676ba0c357ba2eeb0308f246/download', 
+                      // //  books[index].title); 
+                      //  }, ),
                        
                     ],),
                       shape: RoundedRectangleBorder(
@@ -767,3 +775,173 @@ Future<File> resizeImage(File file) async {
     );
   }
 }
+
+
+
+//import 'package:flutter/material.dart';
+
+class BookDetails2Screen extends StatefulWidget {
+  @override
+  _BookDetails2ScreenState createState() => _BookDetails2ScreenState();
+}
+
+class _BookDetails2ScreenState extends State<BookDetails2Screen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFFCEFEF), // Light peach background color
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Book Image and Actions
+            Expanded(
+              flex: 3,
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Image.network(
+                        'https://ma.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/41/517756/1.jpg?5375', // Replace with your book cover image
+                          fit: BoxFit.cover,
+                          height: 200,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 10,
+                      top: 10,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.arrow_back, color: Colors.grey),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Book Information
+            Expanded(
+              flex: 4,
+              child: Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'The Arsonist',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      'by Chloe Hooper',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.amber, size: 20),
+                        Icon(Icons.star, color: Colors.amber, size: 20),
+                        Icon(Icons.star, color: Colors.amber, size: 20),
+                        Icon(Icons.star_half, color: Colors.amber, size: 20),
+                        Icon(Icons.star_border, color: Colors.amber, size: 20),
+                        SizedBox(width: 5),
+                        Text(
+                          '4.0 / 5.0',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          children: [
+                            Text('Genre', style: TextStyle(color: Colors.grey)),
+                            SizedBox(height: 5),
+                            Text('Novel', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text('Pages', style: TextStyle(color: Colors.grey)),
+                            SizedBox(height: 5),
+                            Text('344', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text('Time', style: TextStyle(color: Colors.grey)),
+                            SizedBox(height: 5),
+                            Text('12h 30m', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'On the day that became known as Black Saturday, one man deliberately lit two fires near the small town of Churchill, Gippsland, then sat on the roof of his house and watched the flames.',
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        height: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFFFA726), // Orange button color
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: Text(
+                            'Buy Now for \$34.99',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
