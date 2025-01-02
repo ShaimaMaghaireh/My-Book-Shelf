@@ -56,7 +56,7 @@ class  _newpagestate extends State <newpage>
         {
           if(Constraints.maxWidth>1200) //? descktop
           {
-            return SplashScreen();
+            return BookListScreen();
           }
 
           else if(Constraints.maxWidth<=1200 && Constraints.maxWidth>=800)//?tablet

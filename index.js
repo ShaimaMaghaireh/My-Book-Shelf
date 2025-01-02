@@ -50,6 +50,7 @@ const popularSchema = new mongoose.Schema({
     rating: Number,
     isFavorite: Boolean,
     description: String,
+    pdf: String,
 });
 
 //? Define models
@@ -172,42 +173,6 @@ app.get('/books/:id/download', async (req, res) => {
     }
 });
 
-
-// app.get('/popular/:id/download', async (req, res) => {
-//   try {
-//     const bookid = req.params.id;
-
-//     // Validate the book ID
-//     if (!mongoose.Types.ObjectId.isValid(bookid)) {
-//       return res.status(400).json({ error: 'Invalid book ID format' });
-//     }
-
-//     // Find the book in the database
-//     const popularbook = await Popular.findById(bookid);
-
-//     if (!popularbook || !popularbook.pdf) {
-//       return res.status(404).json({ error: 'Book or file not found' });
-//     }
-
-//     const filePath = path.resolve(popularbook.pdf); // Resolve the file path to ensure it's absolute
-
-//     // Check if the file exists on the server
-//     if (!fs.existsSync(filePath)) {
-//       return res.status(404).json({ error: 'File not found on server' });
-//     }
-
-//     // Send the file to the client
-//     res.download(filePath, `${popularbook.title1}.pdf`, (err) => {
-//       if (err) {
-//         console.error('Error downloading file:', err);
-//         return res.status(500).json({ error: 'Error downloading file' });
-//       }
-//     });
-//   } catch (err) {
-//     console.error('Error fetching book:', err);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// });
 
 app.get('/popular/:id/download', async (req, res) => {
     try {
