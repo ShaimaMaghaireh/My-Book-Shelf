@@ -191,33 +191,6 @@ void checkpermissions() async {
       appBar: AppBar(
         title: Text(book.title),
       ),
-       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        backgroundColor: Color.fromARGB(255, 49, 251, 254), // Custom background color
-        selectedItemColor: Colors.black, // Custom selected item color
-        unselectedItemColor: Colors.grey, // Custom unselected item color
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed, // Custom style
-        elevation: 10.0, // Add shadow to the navigation bar
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-            backgroundColor: Colors.white,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'My List',
-            backgroundColor: Colors.white,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-            backgroundColor: Colors.white,
-          ),
-        ],
-      ),
      body: SafeArea(
         child: ListView(
           children: [
@@ -360,7 +333,7 @@ void checkpermissions() async {
                       onPressed: () async {
                         print('object');
                         String bookId =book.id;//? fetch the id of the book
-                       await _downloadPDF('http://192.168.243.213:3003/books/$bookId/download', 
+                       await _downloadPDF('http://192.168.100.90:3003/books/$bookId/download', 
                        book.title);
                       //   await _downloadPDF('http://192.168.100.114:3001/books/676ba0c357ba2eeb0308f246/download', 
                       //  books[index].title); 
@@ -611,7 +584,7 @@ void checkpermissions() async {
                       onPressed: () async {
                         print('object');
                         String bookId1 = popularBooks.id;//? fetch the id of the book
-                       await _downloadPDF('http://192.168.243.213:3003/popular/$bookId1/download', 
+                       await _downloadPDF('http://192.168.100.90:3003/popular/$bookId1/download', 
                        popularBooks.title1);
                        },
                       child: Center(

@@ -16,8 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return Scaffold(
         body: Stack(
           children: [
             // Background Image
@@ -60,7 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'EMAIL',
                       style: TextStyle(
-                        color: Colors.lightBlue,
+                        color: Color.fromRGBO(151, 168, 245, 1),
+                        letterSpacing: 5,
                         fontSize: 30,fontWeight: FontWeight.bold
                       ),
                     ),
@@ -74,6 +74,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
                       decoration: InputDecoration(
                         border: InputBorder.none,
+                         hintText: 'Enter your email',
+                        hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
                     SizedBox(height: 30),
@@ -81,7 +83,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'PASSWORD',
                       style: TextStyle(
-                       color: Colors.lightBlue,
+                      // color: Color.fromRGBO(132, 192, 219, 1),
+                      color: Color.fromRGBO(151, 168, 245, 1),
+                       letterSpacing: 5,
                         fontSize: 30,fontWeight: FontWeight.bold
                       ),
                     ),
@@ -96,6 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         border: InputBorder.none,
+                         hintText: 'Enter your password',
+                        hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
                     SizedBox(height: 40),
@@ -105,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: () async{
                         // Handle login action here
                        // Replace with your backend URL
-       const String url = 'http://192.168.243.213:3001/login';
+       const String url = 'http://192.168.100.90:3003/login';
 
   // Create request body
   final body = jsonEncode({
@@ -114,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
   });
 
   try {
-   final url = Uri.parse('http://192.168.243.213:3001/login');
+   final url = Uri.parse('http://192.168.100.90:3003/login');
 final response = await http.post(
   url,
   headers: {'Content-Type': 'application/json'},
@@ -124,7 +130,7 @@ final response = await http.post(
 if (response.statusCode == 200) {
   final responseData = jsonDecode(response.body);
   print('Login successful: ${responseData['name']}');
-   Navigator.pushReplacement(
+   Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => BookListScreen()),
       );
@@ -140,17 +146,11 @@ if (response.statusCode == 200) {
 },
                         child: CircleAvatar(
                           radius: 30,
-                          backgroundColor: Colors.lightBlue,
+                          backgroundColor: Color.fromRGBO(151, 168, 245, 1),
                           child: Icon(Icons.arrow_forward, color: Colors.white),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 30),
-                     IconButton(onPressed: (){
-                Navigator.pop(context);
-                }, 
-                icon: Icon(Icons.arrow_back_ios_new,
-                color: Colors.deepPurpleAccent,)),
+                    ),     
                     Spacer(),
                     
                   ],
@@ -159,7 +159,7 @@ if (response.statusCode == 200) {
             ),
           ],
         ),
-      ),
+      
     );
   }
 }

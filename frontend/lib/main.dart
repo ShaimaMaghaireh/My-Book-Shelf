@@ -3,13 +3,6 @@ import 'package:frontend/Splash.dart';
 import 'package:frontend/login.dart';
 import 'package:frontend/screens/book_Details_Screen.dart';
 import 'screens/book_list_screen.dart';
-import 'package:flutter/material.dart';
-import '../models/book.dart';
-import '../services/api_service.dart';
-import 'RegisterChoice.dart';
-import 'Splash.dart';
-import 'login.dart';
-import 'signup.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -65,7 +58,7 @@ class  _newpagestate extends State <newpage>
           }
           else //?phone
           {
-            return BookListScreen();
+            return SplashScreen();
           }
 
         

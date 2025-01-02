@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/popular.dart';
 import 'package:frontend/models/user.dart';
+import 'package:frontend/models/book.dart';
 import 'package:frontend/services/read_list_service.dart';
 import '../models/book.dart';
 import '../services/api_service.dart';
@@ -13,6 +14,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'book_Details_Screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
+
+
 String _getFilePath(String title) {
   final directory = Directory('/storage/emulated/0/Download');
   return '${directory.path}/$title.pdf';
@@ -52,22 +55,60 @@ void _onItemTapped(int index) {
     });
   }
 
-   void _onSearchChanged() {
-    setState(() {
-      if (_searchController.text.isNotEmpty) {
-        books = ApiService().searchBooks(_searchController.text);//? search for books based on title
+// Modify _onSearchChanged to return only the book you searched for
+Future<List<Book>> _onSearchChanged() async {
+  if (_searchController.text.isNotEmpty) {
+    // Search for the book based on the title
+    List<Book> searchResults = await ApiService().searchBooks(_searchController.text);
 
-      } 
-      else {
-        books = ApiService().fetchBooks();  //?fethc the book after search
-      }
-    });
+    // Find the book that exactly matches the title of the search query
+    List<Book> matchingBooks = searchResults
+        .where((book) => book.title.toLowerCase() == _searchController.text.toLowerCase())
+        .toList();
+
+    // Return the matching books (if any) or an empty list if no match is found
+    return matchingBooks;
+  } else {
+    return []; // Return an empty list if search is empty
   }
+}
+
+void _showSearchResults(BuildContext context, List<Book> books) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Search Results'),
+      content: books.isNotEmpty
+          ? ListView.builder(
+              itemCount: books.length,
+              itemBuilder: (context, index) {
+                Book book = books[index];
+                return ListTile(
+                  title: Text(book.title),
+                  subtitle: Text(book.author),
+                   leading: Image.network(book.image),
+                  // You can customize this further to display more details
+                );
+              },
+            )
+          : Text('No books found.'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();  // Close the dialog
+          },
+          child: Text('Close'),
+        ),
+      ],
+    ),
+  );
+}
+
  
  
   Future<bool> _requestStoragePermission() async {
   var status = await Permission.storage.request();
-  print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+  //print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
   print(status.isGranted);
   if (!status.isGranted) {
     status = await Permission.storage.request();
@@ -132,7 +173,10 @@ Future<void> _downloadPDF(String url, String title) async {
               ),
             ),
             ListTile(
-              title: Text('About App'),
+              title: Text('About App',style: 
+              TextStyle(fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 84, 113, 195),
+              letterSpacing: 2),),
               onTap: () {
                 // Handle item tap
     Navigator.push( context, MaterialPageRoute(builder: (context) => AboutScreen()),
@@ -140,7 +184,10 @@ Future<void> _downloadPDF(String url, String title) async {
               },
             ),
            ListTile(
-  title: Text('Book Review'),
+  title: Text('Book Review',style: 
+              TextStyle(fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 84, 113, 195),
+              letterSpacing: 2)),
   onTap: () {
     Navigator.push(
       context,
@@ -149,7 +196,10 @@ Future<void> _downloadPDF(String url, String title) async {
   },
 ),
 ListTile(
-              title: Text('Profile'),
+              title: Text('Profile',style: 
+              TextStyle(fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 84, 113, 195),
+              letterSpacing: 2)),
               onTap: () {
                 // Handle item tap
     Navigator.push( context, MaterialPageRoute(builder: (context) => ProfilePage()),
@@ -157,7 +207,10 @@ ListTile(
               },
             ),
             ListTile(
-              title: Text('Reading List'),
+              title: Text('Reading List',style: 
+              TextStyle(fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 84, 113, 195),
+              letterSpacing: 2)),
               onTap: () {
                 // Handle item tap
               Navigator.push( context, MaterialPageRoute(builder: (context) => ReadingListPage()),
@@ -168,29 +221,38 @@ ListTile(
         ),
       ),
       appBar: AppBar(
-        backgroundColor:Color(0xFF6AD6F7) ,
+        backgroundColor:Color.fromRGBO(143, 208, 243, 1),
         title: Text(textAlign: TextAlign.center,'Fantasy Library',
         style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: ListView(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-             controller: _searchController,
-              onChanged: (value) => _onSearchChanged(),
-              decoration: InputDecoration(
-                labelText: 'Search Books',
-                prefixIcon: Icon(Icons.search),
-                 suffixIcon:IconButton( onPressed: () {
-              //_showSearchResults(context); // Show search results in AlertDialog
-            },  icon: Icon(Icons.filter_list)),  
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+         Padding(
+  padding: const EdgeInsets.all(8.0),
+  child: TextField(
+    controller: _searchController,
+    onChanged: (value) => _onSearchChanged(),
+    decoration: InputDecoration(
+      labelText: 'Search Books',
+      prefixIcon: Icon(Icons.search),
+      suffixIcon: IconButton(
+        onPressed: () async {
+          // Trigger the search and get results
+          List<Book> searchResults = await _onSearchChanged(); // Await the search results
+          _showSearchResults(context, searchResults); // Show the results in an AlertDialog
+        },
+        icon: Icon(Icons.filter_list),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+  ),
+),
+       Text(
+              'Recomended Books',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-          ),
           Container(
             width: 150,
             height:480,
@@ -224,16 +286,7 @@ ListTile(
                       Image.network(books[index].image,fit: BoxFit.fill,width: 280,height: 350,),
                       Text(books[index].title,style: TextStyle(fontSize:25,color:Color.fromARGB(255, 51, 97, 178) ),),
                       Text(books[index].author,style: TextStyle(fontWeight: FontWeight.bold),),
-                      // IconButton(
-                      //  icon: Icon(Icons.download),
-                      //  onPressed: () async {
-                      //   print('object');
-                      //   String bookId =books[index].id;//? fetch the id of the book
-                      //  await _downloadPDF('http://192.168.243.213:3001/books/$bookId/download', 
-                      //  books[index].title);
-                      // //   await _downloadPDF('http://192.168.100.114:3001/books/676ba0c357ba2eeb0308f246/download', 
-                      // //  books[index].title); 
-                      //  }, ),
+                   
                        
                     ],),
                       shape: RoundedRectangleBorder(
@@ -327,7 +380,7 @@ Padding(
        bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        backgroundColor: Color.fromARGB(255, 49, 251, 254), // Custom background color
+        backgroundColor: Color.fromRGBO(143, 208, 243, 1), // Custom background color
         selectedItemColor: Colors.black, // Custom selected item color
         unselectedItemColor: Colors.grey, // Custom unselected item color
         showUnselectedLabels: true,
@@ -360,7 +413,7 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(130, 205, 239, 1),
+        backgroundColor: Color.fromRGBO(143, 208, 243, 1),
         title: Text('About the App', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Container(

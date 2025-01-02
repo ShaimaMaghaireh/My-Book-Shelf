@@ -78,7 +78,7 @@ class _RegisterChoicePageState extends State<RegisterChoicePage> {
                     ),
                   ),
                   onPressed: () {
-                   Navigator.pushReplacement(
+                   Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => SignupScreen()), // Your next screen
     );
