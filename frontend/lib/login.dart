@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: () async{
                         // Handle login action here
                        // Replace with your backend URL
-       const String url = 'http://192.168.100.90:3003/login';
+       const String url = 'http://192.168.243.213:3003/login';
 
   // Create request body
   final body = jsonEncode({
@@ -120,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
   });
 
   try {
-   final url = Uri.parse('http://192.168.100.90:3003/login');
+   final url = Uri.parse('http://192.168.243.213:3003/login');
 final response = await http.post(
   url,
   headers: {'Content-Type': 'application/json'},

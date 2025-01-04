@@ -14,7 +14,7 @@ class _SignupScreenState extends State<SignupScreen> {
   String password = '';
 
   Future<void> signUp() async {
-    final url = Uri.parse('http://192.168.100.90:3003/signup'); //? Replace with backend URL
+    final url = Uri.parse('http://192.168.243.213:3003/signup'); //? Replace with backend URL
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

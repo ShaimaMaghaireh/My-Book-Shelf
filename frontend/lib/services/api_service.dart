@@ -6,11 +6,11 @@ import '../models/book.dart';
 
 class ApiService {
 
-//final String baseUrl = "http://10.0.2.2:3001/books";  //? url for emulator
+//final String baseUrl = "http://10.0.2.2:3003/books";  //? url for emulator
 //final String baseUrl='http://127.0.0.1:3001/books';  //?url for windows
 //final String baseUrl='http://10.0.2.2:3001/books'; //? url for chrome
 // final String baseUrl='http://192.168.100.114:3001/books'; //? myphone
-final String baseUrl='http://192.168.100.90:3003/books'; //? myphone
+final String baseUrl='http://192.168.243.213:3003/books'; //? myphone
 
 //? Fetch all books
   Future<List<Book>> fetchBooks() async {
@@ -26,8 +26,8 @@ final String baseUrl='http://192.168.100.90:3003/books'; //? myphone
     }
   }
 //todo: Fetch popular books
-   final String baseUrl3 = "http://192.168.100.90:3003/popular";
-    //final String baseUrl3 = "http://10.0.2.2:3001/popular";//?for emulator
+   final String baseUrl3 = "http://192.168.243.213:3003/popular";
+    //final String baseUrl3 = "http://10.0.2.2:3003/popular";//?for emulator
   Future<List<popularBook>> fetchPopularBooks() async {
     print ('object');
     final response = await http.get(Uri.parse(baseUrl3));
@@ -55,19 +55,19 @@ final String baseUrl='http://192.168.100.90:3003/books'; //? myphone
   }
 
 
-   Future<Book> fetchBookByTitle(String bookTitle) async {
-    final response = await http.get(Uri.parse(baseUrl));
-    //('$baseUrl/books/title/$bookTitle')
-    if (response.statusCode == 200) {
-      return Book.fromJson(json.decode(response.body));  // Assuming your Book model has a fromJson method
-    } else {
-      throw Exception('Failed to load book details');
-    }
-  }
+  //  Future<Book> fetchBookByTitle(String bookTitle) async {
+  //   final response = await http.get(Uri.parse(baseUrl));
+  //   //('$baseUrl/books/title/$bookTitle')
+  //   if (response.statusCode == 200) {
+  //     return Book.fromJson(json.decode(response.body));  // Assuming your Book model has a fromJson method
+  //   } else {
+  //     throw Exception('Failed to load book details');
+  //   }
+  // }
 
 //todo: Fetch user 
- final String baseUrl2 = "http://192.168.100.90:3003/users"; // Replace with your API URL
-//final String baseUrl2 = "http://10.0.2.2:3001/users";//?for emulator
+ //final String baseUrl2 = "http://192.168.100.90:3003/users"; // Replace with your API URL
+final String baseUrl2 = "http://192.168.243.213:3003/users";//?for emulator
  Future<User> fetchUser() async {
   final response = await http.get(Uri.parse(baseUrl2));
 

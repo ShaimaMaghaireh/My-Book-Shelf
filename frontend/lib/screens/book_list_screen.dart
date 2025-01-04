@@ -73,29 +73,36 @@ Future<List<Book>> _onSearchChanged() async {
   }
 }
 
+
+
 void _showSearchResults(BuildContext context, List<Book> books) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: Text('Search Results'),
-      content: books.isNotEmpty
-          ? ListView.builder(
-              itemCount: books.length,
-              itemBuilder: (context, index) {
-                Book book = books[index];
-                return ListTile(
-                  title: Text(book.title),
-                  subtitle: Text(book.author),
-                   leading: Image.network(book.image),
-                  // You can customize this further to display more details
-                );
-              },
-            )
-          : Text('No books found.'),
+      content: Container(
+        width: 300, // Set the width of the dialog
+        height: 300, // Set the height of the dialog
+        child: books.isNotEmpty
+            ? ListView.builder(
+                itemCount: books.length,
+                itemBuilder: (context, index) {
+                  Book book = books[index];
+                  return ListTile(
+                    title: Text(book.title),
+                    subtitle: Text(book.author),
+                    leading: Image.network(book.image),
+                  );
+                },
+              )
+            : Center(
+                child: Text('No books found.'),
+              ),
+      ),
       actions: <Widget>[
         TextButton(
           onPressed: () {
-            Navigator.of(context).pop();  // Close the dialog
+            Navigator.of(context).pop(); // Close the dialog
           },
           child: Text('Close'),
         ),
@@ -103,56 +110,6 @@ void _showSearchResults(BuildContext context, List<Book> books) {
     ),
   );
 }
-
- 
- 
-  Future<bool> _requestStoragePermission() async {
-  var status = await Permission.storage.request();
-  //print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-  print(status.isGranted);
-  if (!status.isGranted) {
-    status = await Permission.storage.request();
-  }
-  return true;
-}
-
-  void checkpermissions() async { 
-  var status = await Permission.camera.status;
-   if (!status.isGranted)
-    { await Permission.camera.request(); }
-     }
-
-Future<void> _downloadPDF(String url, String title) async {
-  final dio = Dio();
-
-  try {
-    // Request storage permission
-    bool hasPermission = await _requestStoragePermission();
-    if (!hasPermission) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Storage permission is required')),
-      );
-      return;
-    }
-
-    // Define save path
-    String savePath = _getFilePath(title);
-
-    // Download file
-    await dio.download(url, savePath);
-
-    // Notify user of success
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Downloaded $title to Downloads folder')),
-    );
-  } catch (e) {
-    // Notify user of failure
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to download file: $e')),
-    );
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -467,9 +424,12 @@ class AboutScreen extends StatelessWidget {
                   ],
                 ),
                 child: Text(
-                  'This app offers a variety of services to help users manage their plant collection. '
-                  'From purchasing plants to tracking your plant care, we provide tools to ensure '
-                  'your plants thrive. Here are some of the features we offer:',
+                  'This app offers a variety of services to help users manage their book collection. '
+                  //'From purchasing plants to tracking your plant care, we provide tools to ensure '
+                  'You can download the books,add the books to your reading List,and '
+                  'search for specific books.Here are some of the features we offer:'
+                  //'your plants thrive. Here are some of the features we offer:'
+                  ,
                   style: TextStyle(fontSize: 16, color: Colors.black87),
                 ),
               ),
@@ -517,10 +477,10 @@ class AboutScreen extends StatelessWidget {
                   ],
                 ),
                 child: Text(
-                  '1. Plant Shopping\n'
-                  '2. Care Tips and Reminders\n'
-                  '3. Plant Growth Tracking\n'
-                  '4. Community Sharing and Advice\n',
+                  '1.Search for Books\n'
+                  '2.Write a review \n'
+                  '3. Download your books\n',
+                  //'4. Community Sharing and Advice\n',
                   style: TextStyle(fontSize: 16, color: Colors.black87),
                 ),
               ),
@@ -561,11 +521,12 @@ class BookReviewScreen extends StatefulWidget {
 
 class _BookReviewScreenState extends State<BookReviewScreen> {
   late Future<List<Book>> books;
-
+  late Future<List<popularBook>> popularBooks;//todo
   @override
   void initState() {
     super.initState();
-    books = ApiService().fetchBooks(); // Fetch the list of books
+    books = ApiService().fetchBooks(); 
+    popularBooks = ApiService().fetchPopularBooks();//Fetch the list of books//todo
   }
 
   // Function to handle the review submission
@@ -669,48 +630,11 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late Future<User> user; // Future to fetch user data
-  File? _selectedImage;
+ 
   @override
   void initState() {
     super.initState();
     user = ApiService().fetchUser(); //? Fetch user information from MongoDB
-  }
- Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
-  }
-Future<File> resizeImage(File file) async {
-  final originalImage = img.decodeImage(file.readAsBytesSync());
-  final resizedImage = img.copyResize(originalImage!, width: 300);
-  final resizedFile = File(file.path)..writeAsBytesSync(img.encodeJpg(resizedImage));
-  return resizedFile;
-}
-  Future<void> _updateProfileImage(String userId) async {
-    if (_selectedImage == null) return;
-
-    // Convert image to base64
-    String base64Image = base64Encode(await _selectedImage!.readAsBytes());
-
-    // Update user profile image in MongoDB
-    final response = await http.put(
-      Uri.parse('http://192.168.100.90:3001/users/$userId'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'profileImage': base64Image}),
-    );
-
-    if (response.statusCode == 200) {
-      // Refresh user data after successful update
-      setState(() {
-        user = ApiService().fetchUser();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile image updated successfully!')));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile image.')));
-    }
   }
 
   @override
@@ -765,15 +689,7 @@ Future<File> resizeImage(File file) async {
         padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
         child: Column(
           children: [
-             GestureDetector(
-              onTap: _pickImage, // Open image picker when the avatar is tapped
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: _selectedImage != null
-                    ? FileImage(_selectedImage!)
-                    : NetworkImage(user.profileImage) as ImageProvider,
-              ),
-            ),
+            CircleAvatar(child: Image.network(user.profileImage),maxRadius: 80,),
             SizedBox(height: 16),
             Text(
               user.name,
@@ -784,10 +700,7 @@ Future<File> resizeImage(File file) async {
               ),
             ),
             SizedBox(height: 8),
-             ElevatedButton(
-              onPressed: () => _updateProfileImage(user.name),
-              child: Text('Update Profile Image'),
-            ),
+         
           ],
         ),
       ),
@@ -831,170 +744,5 @@ Future<File> resizeImage(File file) async {
 
 
 
-//import 'package:flutter/material.dart';
 
-class BookDetails2Screen extends StatefulWidget {
-  @override
-  _BookDetails2ScreenState createState() => _BookDetails2ScreenState();
-}
-
-class _BookDetails2ScreenState extends State<BookDetails2Screen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFFCEFEF), // Light peach background color
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Book Image and Actions
-            Expanded(
-              flex: 3,
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Image.network(
-                        'https://ma.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/41/517756/1.jpg?5375', // Replace with your book cover image
-                          fit: BoxFit.cover,
-                          height: 200,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 10,
-                      top: 10,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.arrow_back, color: Colors.grey),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Book Information
-            Expanded(
-              flex: 4,
-              child: Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'The Arsonist',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      'by Chloe Hooper',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star_half, color: Colors.amber, size: 20),
-                        Icon(Icons.star_border, color: Colors.amber, size: 20),
-                        SizedBox(width: 5),
-                        Text(
-                          '4.0 / 5.0',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Text('Genre', style: TextStyle(color: Colors.grey)),
-                            SizedBox(height: 5),
-                            Text('Novel', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Text('Pages', style: TextStyle(color: Colors.grey)),
-                            SizedBox(height: 5),
-                            Text('344', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Text('Time', style: TextStyle(color: Colors.grey)),
-                            SizedBox(height: 5),
-                            Text('12h 30m', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'On the day that became known as Black Saturday, one man deliberately lit two fires near the small town of Churchill, Gippsland, then sat on the roof of his house and watched the flames.',
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        height: 1.5,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFFFA726), // Orange button color
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      onPressed: () {},
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          child: Text(
-                            'Buy Now for \$34.99',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 

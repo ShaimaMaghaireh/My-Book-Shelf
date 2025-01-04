@@ -28,29 +28,6 @@ class ReadingListProvider with ChangeNotifier {
   }
 }
 
-// class ReadingListManager {
-//   static final ReadingListManager _instance = ReadingListManager._internal();
-
-//   factory ReadingListManager() {
-//     return _instance;
-//   }
-
-//   ReadingListManager._internal();
-
-//   final List<Book> _readingList = [];
-
-//   List<Book> get readingList => _readingList;
-
-//   void addBook(Book book) {
-//     if (!_readingList.contains(book)) {
-//       _readingList.add(book);
-//     }
-//   }
-
-//   void removeBook(Book book) {
-//     _readingList.remove(book);
-//   }
-// }
 
 String _getFilePath(String title) {
   final directory = Directory('/storage/emulated/0/Download');
@@ -74,65 +51,8 @@ late Book book;
       _selectedIndex = index; //? Update the selected index in bottom navigation bar
     });
   }
-// //todo
-//   Future<String> getUniqueFilePath(String basePath) async {
-//   var filePath = basePath;
-//   int counter = 1;
-
-//   // Loop to find a unique file name if the file already exists
-//   while (await File(filePath).exists()) {
-//     filePath = basePath.replaceFirst('.pdf', '($counter).pdf');
-//     counter++;
-//   }
-//   return filePath;
-// }
-
-// Future<void> saveFile(String basePath, List<int> fileBytes) async {
-//   final filePath = await getUniqueFilePath(basePath);
-//   final file = File(filePath);
-
-//   try {
-//     await file.writeAsBytes(fileBytes);
-//     print('File saved at $filePath');
-//   } catch (e) {
-//     print('Error saving file: $e');
-//   }
-// }
-
-//   final String fileName = 'Ekadolli.pdf';
-//   final String downloadPath = '/storage/emulated/0/Download';
-
-  
-
-//   Future<void> downloadFile() async {
-//   if (await Permission.storage.request().isGranted) {
-//     final List<int> fileBytes = [0x25, 0x50, 0x44, 0x46];
-//     final String basePath = '$downloadPath/$fileName';
-
-//     try {
-//       await saveFile(basePath, fileBytes);
-//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-//         content: Text('File downloaded successfully.'),
-//       ));
-//     } catch (e) {
-//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-//         content: Text('Failed to download file: $e'),
-//       ));
-//     }
-//   } else {
-//     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-//       content: Text('Storage permission denied.'),
-//     ));
-//   }
-// }
 
 
-//todo
-
-// String _getFilePath(String title) {
-//   final directory = Directory('/storage/emulated/0/Download');
-//   return '${directory.path}/$title.pdf ';
-// }
 Future<void> _downloadPDF(String url, String title) async {
   final dio = Dio();
 
@@ -294,33 +214,7 @@ void checkpermissions() async {
                     ),
                 SizedBox(height: 30),
               
-  //                   ElevatedButton(
-  //                     style: ElevatedButton.styleFrom(
-  //                       backgroundColor: Color.fromARGB(255, 151, 185, 248), // Orange button color
-  //                       shape: RoundedRectangleBorder(
-  //                         borderRadius: BorderRadius.circular(30),
-  //                       ),
-  //                     ),
-  //                     onPressed: () {
-
-  //                      // Add book to the reading list
-  //  setState(() {
-  //                       ReadingListManager().removeBook(book);
-  //                     });
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       SnackBar(content: Text('${book.title} removed from your Reading List.')),
-  //                     );
-  //                     },
-  //                     child: Center(
-  //                       child: Padding(
-  //                         padding: const EdgeInsets.symmetric(vertical: 15),
-  //                         child: Text(
-  //                           'Borrow',
-  //                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.black),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ),
+  
                     SizedBox(height: 20,),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -333,7 +227,7 @@ void checkpermissions() async {
                       onPressed: () async {
                         print('object');
                         String bookId =book.id;//? fetch the id of the book
-                       await _downloadPDF('http://192.168.100.90:3003/books/$bookId/download', 
+                       await _downloadPDF('http://192.168.243.213:3003/books/$bookId/download', 
                        book.title);
                       //   await _downloadPDF('http://192.168.100.114:3001/books/676ba0c357ba2eeb0308f246/download', 
                       //  books[index].title); 
@@ -584,7 +478,7 @@ void checkpermissions() async {
                       onPressed: () async {
                         print('object');
                         String bookId1 = popularBooks.id;//? fetch the id of the book
-                       await _downloadPDF('http://192.168.100.90:3003/popular/$bookId1/download', 
+                       await _downloadPDF('http://192.168.243.213:3003/popular/$bookId1/download', 
                        popularBooks.title1);
                        },
                       child: Center(
